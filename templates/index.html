@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/style.css" >
+
+    <title>Your Video Search Page</title>
+    <style>
+        /* Add your custom styles here */
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Search Bar -->
+    <div class="input-group">
+      
+
+        {% comment %} <input type="text" class="form-control" placeholder="Enter keywords to search videos..." aria-label="Search videos" aria-describedby="search-button" autofocus> {% endcomment %}
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" id="upload-button" data-toggle="modal" data-target="#uploadModal">
+                <i class="fas fa-upload"></i> Upload Video
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="videoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            
+        </div>
+    </div>
+</div>
+
+<!-- Upload Video Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">Upload Video</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal fade" id="uploadingModal" tabindex="-1" role="dialog" aria-labelledby="uploadingModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body text-center">
+                            <p>Uploading...</p>
+                            <div class="spinner-border" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Your existing form code -->
+            <div class="modal-body">
+                <!-- Upload Video Form -->
+                <form id="videoUploadForm" action="{% url 'process_video' %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="videoTitle">Video Title</label>
+                        <input type="text" class="form-control" id="videoTitle" name="video_title" placeholder="Enter video title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="videoDescription">Video Description</label>
+                        <textarea class="form-control" id="videoDescription" name="video_description" rows="3" placeholder="Enter video description" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="videoFile">Upload Video</label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="videoFile" name="video_file" accept="video/*" required>
+                            <label class="custom-file-label" for="videoFile">Choose file</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#uploadingModal">Upload</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        {% for video_data in videos %}
+            <div class="col-md-6">
+                <div class="video-container my-4 p-4" id="videoContainer{{ forloop.counter }}">
+                    <div class="my-3">
+                        <input type="text" class="form-control searchInput mb-3" placeholder="Search for subtitles" id="searchInput{{ forloop.counter }}">
+                        <ul class="list-group subtitleList" id="subtitleList{{ forloop.counter }}">
+                            {% for subtitle in video_data.subtitles %}
+                                <li data-start="{{ subtitle.start }}" data-end="{{ subtitle.end }}" class="list-group-item subtitle-item" style="display: none;">
+                                    <a href="#" class="subtitle-link">
+                                        {{ subtitle.text }} ({{ subtitle.start_time | floatformat:2 }}) - {{ subtitle.start_time|date:"i:s" }} - {{ subtitle.start_time|date:"H:i" }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+
+                        <video class="myVideo mt-3" width="100%" height="auto" controls id="myVideo{{ forloop.counter }}">
+                            <source src="{{ video_data.video_url }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+
+                    <script>
+                        const container{{ forloop.counter }} = document.getElementById('videoContainer{{ forloop.counter }}');
+                        const searchInput{{ forloop.counter }} = container{{ forloop.counter }}.querySelector('#searchInput{{ forloop.counter }}');
+                        const subtitleList{{ forloop.counter }} = container{{ forloop.counter }}.querySelector('#subtitleList{{ forloop.counter }}');
+                        const video{{ forloop.counter }} = container{{ forloop.counter }}.querySelector('#myVideo{{ forloop.counter }}');
+                        const subtitleItems{{ forloop.counter }} = container{{ forloop.counter }}.querySelectorAll('.subtitle-item');
+
+                        searchInput{{ forloop.counter }}.addEventListener('input', function () {
+                            const query = searchInput{{ forloop.counter }}.value.toLowerCase();
+
+                            subtitleItems{{ forloop.counter }}.forEach(subtitle => {
+                                const text = subtitle.innerText.toLowerCase();
+                                const isVisible = text.includes(query);
+
+                                subtitle.style.display = isVisible ? 'block' : 'none';
+                            });
+
+                            // If no key is searched, hide all subtitles
+                            if (!query) {
+                                subtitleItems{{ forloop.counter }}.forEach(subtitle => {
+                                    subtitle.style.display = 'none';
+                                });
+                            }
+
+                            // Show only the first 10 matched results
+                            let count = 0;
+                            subtitleItems{{ forloop.counter }}.forEach(subtitle => {
+                                if (subtitle.style.display === 'block' && count < 10) {
+                                    subtitle.style.display = 'block';
+                                    count++;
+                                } else {
+                                    subtitle.style.display = 'none';
+                                }
+                            });
+                        });
+
+                        subtitleList{{ forloop.counter }}.addEventListener('click', function (event) {
+                            if (event.target.classList.contains('subtitle-link')) {
+                                event.preventDefault(); // Prevent the link from navigating
+
+                                const startTime = parseFloat(event.target.parentElement.getAttribute('data-start'));
+                                console.log('Navigate to time:', startTime);
+
+                                // Move the video to the start time
+                                video{{ forloop.counter }}.currentTime = startTime;
+
+                                // Play the video from the new start time
+                                video{{ forloop.counter }}.play();
+
+                                // Hide the search results when a subtitle is clicked
+                                subtitleItems{{ forloop.counter }}.forEach(subtitle => {
+                                    subtitle.style.display = 'none';
+                                });
+                            }
+                        });
+                    </script>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#videoUploadForm').submit(function () {
+            // Show the modal when the form is submitted
+            $('#uploadingModal').modal('show');
+        });
+    });
+</script>
+
+
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
