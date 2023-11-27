@@ -63,7 +63,7 @@
             <!-- Your existing form code -->
             <div class="modal-body">
                 <!-- Upload Video Form -->
-                <form id="videoUploadForm" action="{% url 'process_video' %}" method="POST" enctype="multipart/form-data">
+                <form id="videoUploadForm" action="{% url 'home' %}" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="videoTitle">Video Title</label>
