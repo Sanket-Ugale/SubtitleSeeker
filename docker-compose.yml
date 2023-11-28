@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - redis
+
+  celery:
+    build: .
+    command: celery -A subtitlesApp.celery worker --pool=solo -l info
+    depends_on:
+      - web
+      - redis
+
+  redis:
+    image: "redis:alpine"
+
+    
+
