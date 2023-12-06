@@ -6,7 +6,7 @@ WORKDIR /SubtitleSeeker
 
 # Copy the local requirements file to the container
 COPY requirements.txt .
-
+# RUN apt-get update && apt-get install -y tmux   # Install tmux
 RUN pip install --no-cache-dir --upgrade setuptools wheel
 RUN pip install --no-cache-dir celery==5.3.6
 RUN pip install django
@@ -17,4 +17,6 @@ EXPOSE 8000
 
 # Define environment variable
 ENV NAME World
+
+# Start a new tmux session and run Django and Celery
 CMD ["bash", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000 & celery -A subtitlesApp.celery worker --pool=solo -l info"]

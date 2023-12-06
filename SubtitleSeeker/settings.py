@@ -128,10 +128,10 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+# redis://redis:6379/0
 # Celery Settings
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
-CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis-glew2b.serverless.use1.cache.amazonaws.com:6379/0'
+CELERY_BROKER_URL = 'redis://redis-glew2b.serverless.use1.cache.amazonaws.com:6379/0'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER ='json'
 CELERY_TASK_SELERLIZER = 'json'
