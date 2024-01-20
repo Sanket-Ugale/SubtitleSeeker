@@ -1,6 +1,7 @@
 import ast
 from decimal import Decimal
 import json
+import secrets
 import subprocess
 from django.http import HttpResponse, request
 from django.shortcuts import render
@@ -12,20 +13,44 @@ import boto3
 from subtitlesApp.tasks import uploadAndProcessVideo
 import gzip
 from django.core.files.storage import default_storage
+from botocore.exceptions import NoCredentialsError
+from django.conf import settings
+import uuid
 
+def upload_to_s3(file, bucket_name, object_name=None):
+    """Upload a file to an S3 bucket."""
+    s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+
+    try:
+        s3.upload_fileobj(file, bucket_name, object_name)
+    except NoCredentialsError:
+        print('Credentials not available')
 
 def home(request):
-    if request.method=="POST":
-        title=request.POST.get('video_title')
-        desc=request.POST.get('video_description')
+
+    if request.method == "POST":
+        # title = request.POST.get('video_title')
+        # desc = request.POST.get('video_description')
         videoFile = request.FILES.get('video_file')
-        subtitle_instance = Subtitle()
-        subtitle_instance.title = title
-        subtitle_instance.description = desc
-        subtitle_instance.video = videoFile
-        subtitle_instance.save()
-        uploadAndProcessVideo.delay(subtitle_instance.id)
-        return render(request,'index.html')
+
+        # Generate a random string (10 characters) using uuid
+        random_string = str(uuid.uuid4())[:10]
+
+        # Append the random string to the video file name
+        s3_object_name = f'videos/{random_string}_{videoFile.name}'  # Modify the path as needed
+
+        # Save video file to S3
+        s3_bucket_name = AWS_STORAGE_BUCKET_NAME
+        upload_to_s3(videoFile, s3_bucket_name, s3_object_name)
+
+        # Save other form data to the Subtitle model
+
+        # Trigger the background task
+        uploadAndProcessVideo.delay(s3_object_name)
+
+
+        return HttpResponse("Video upload and processing started.")
     else:
         try:
                 # Establish DynamoDB connection
@@ -87,22 +112,6 @@ def home(request):
             return render(request,'index.html')
    
 
+        
 def login(request):
     return render(request,'login.html')
-
-
-# def process_video(request):
-#     if request.method=="POST":
-#         title=request.POST.get('video_title')
-#         desc=request.POST.get('video_description')
-#         videoFile = request.FILES.get('video_file')
-#         subtitle_instance = Subtitle()
-#         subtitle_instance.title = title
-#         subtitle_instance.description = desc
-#         subtitle_instance.video = videoFile
-#         subtitle_instance.save()
-#         uploadAndProcessVideo.delay(subtitle_instance.id)
-#         return render(request,'index.html')
-#     else:
-#         print("No Input for ProcessVideo Function")
-#         return render(request,'index.html')

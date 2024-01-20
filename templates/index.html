@@ -65,14 +65,14 @@
                 <!-- Upload Video Form -->
                 <form id="videoUploadForm" action="{% url 'home' %}" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <div class="form-group">
+                    {% comment %} <div class="form-group">
                         <label for="videoTitle">Video Title</label>
                         <input type="text" class="form-control" id="videoTitle" name="video_title" placeholder="Enter video title" required>
                     </div>
                     <div class="form-group">
                         <label for="videoDescription">Video Description</label>
                         <textarea class="form-control" id="videoDescription" name="video_description" rows="3" placeholder="Enter video description" required></textarea>
-                    </div>
+                    </div> {% endcomment %}
                     <div class="form-group">
                         <label for="videoFile">Upload Video</label>
                         <div class="custom-file">

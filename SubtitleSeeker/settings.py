@@ -84,6 +84,7 @@ DATABASES = {
 }
 
 
+
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
@@ -128,10 +129,8 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# redis://redis:6379/0
-# Celery Settings
-CELERY_RESULT_BACKEND = 'redis://redis-glew2b.serverless.use1.cache.amazonaws.com:6379/0'
-CELERY_BROKER_URL = 'redis://redis-glew2b.serverless.use1.cache.amazonaws.com:6379/0'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER ='json'
 CELERY_TASK_SELERLIZER = 'json'
@@ -143,42 +142,21 @@ CELERY_RESULT_BACKEND = 'django-db'
 CELERY_BEAT_SCHEDULER='django_celery_beat.schedulers:DatabaseScheduler'
 
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # AWS S3 settings
-AWS_ACCESS_KEY_ID = 'AKIAXVW3RQXAHLLDTEOF'
-AWS_SECRET_ACCESS_KEY = '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'
-AWS_STORAGE_BUCKET_NAME = 'awsdatabaldi'
+AWS_ACCESS_KEY_ID = ''
+AWS_SECRET_ACCESS_KEY = ''
+AWS_STORAGE_BUCKET_NAME = ''
 AWS_S3_REGION_NAME = 'ap-south-1'
 AWS_S3_ENDPOINT_URL = 'https://s3-ap-south-1.amazonaws.com'  # Replace with your region-specific S3 endpoint
 
 # Use Amazon S3 for storage for uploaded media files.
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-# AWS DynamoDB settings
-# DYNAMODB_ACCESS_KEY_ID = 'AKIAXVW3RQXAHLLDTEOF'
-# DYNAMODB_SECRET_ACCESS_KEY = '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'
-# DYNAMODB_REGION_NAME = 'ap-south-1'
-# DYNAMODB_TABLE_NAME = 'Subtitle'
 
 
 
 # Media files (uploads)
 MEDIA_URL = 'https://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
-
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django_dynamodb_engine',
-#         'NAME': DYNAMODB_TABLE_NAME,
-#         'AWS_ACCESS_KEY_ID': DYNAMODB_ACCESS_KEY_ID,
-#         'AWS_SECRET_ACCESS_KEY': DYNAMODB_SECRET_ACCESS_KEY,
-#         'AWS_REGION_NAME': DYNAMODB_REGION_NAME,
-#         'AWS_SECURITY_TOKEN': '',
-#         'AWS_SESSION_TOKEN': '',
-#         'HOST': 'dynamodb.%s.amazonaws.com' % DYNAMODB_REGION_NAME,
-#         'PORT': '8000',
-#     }
-# }
-
-# ...
